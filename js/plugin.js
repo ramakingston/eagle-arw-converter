@@ -25,8 +25,6 @@ const state = {
   ffmpegPaths: null,
   formats: ['jpg'],
   size: 'original',
-  saveTo: 'source',
-  customFolder: null,
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -41,7 +39,8 @@ const el = {
   qualityDown: $('#qualityDown'),
   rowSizeCustom: $('#rowSizeCustom'),
   sizeCustomInput: $('#sizeCustomInput'),
-  addToEagle: $('#addToEagle'),
+  sizePercentUp: $('#sizePercentUp'),
+  sizePercentDown: $('#sizePercentDown'),
   btnConvert: $('#btnConvert'),
   btnClose: $('#btnClose'),
   btnClose2: $('#btnClose2'),
@@ -53,10 +52,6 @@ const el = {
   sizeControl: $('#sizeControl'),
   sizeMenu: $('#sizeMenu'),
   sizeValue: $('#sizeValue'),
-
-  saveToControl: $('#saveToControl'),
-  saveToMenu: $('#saveToMenu'),
-  saveToValue: $('#saveToValue'),
 };
 
 // ---------------------------------------------------------------------------
@@ -129,48 +124,17 @@ function updateQualityRowVisibility() {
 
 wireDropdown(el.sizeControl, el.sizeMenu);
 
+function updateSizeLabel() {
+  el.sizeValue.textContent = state.size === 'custom' ? `${el.sizeCustomInput.value || 50}%` : 'Original';
+}
+
 el.sizeMenu.querySelectorAll('.menu-item').forEach((item) => {
   item.addEventListener('click', () => {
     state.size = item.dataset.value;
-    el.sizeValue.textContent = state.size === 'custom' ? 'Custom' : 'Original';
     el.rowSizeCustom.hidden = state.size !== 'custom';
     el.sizeMenu.querySelectorAll('.menu-item').forEach((i) => i.classList.toggle('selected', i === item));
+    updateSizeLabel();
     closeAllMenus();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Save-to dropdown
-// ---------------------------------------------------------------------------
-
-wireDropdown(el.saveToControl, el.saveToMenu);
-
-function markSaveToSelected(value) {
-  el.saveToMenu.querySelectorAll('.menu-item').forEach((i) => i.classList.toggle('selected', i.dataset.value === value));
-}
-
-el.saveToMenu.querySelectorAll('.menu-item').forEach((item) => {
-  item.addEventListener('click', async () => {
-    closeAllMenus();
-    if (item.dataset.value === 'source') {
-      state.saveTo = 'source';
-      el.saveToValue.textContent = 'Same folder';
-      el.saveToValue.title = '';
-      markSaveToSelected('source');
-      return;
-    }
-    try {
-      const result = await eagle.dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] });
-      if (!result.canceled && result.filePaths && result.filePaths[0]) {
-        state.customFolder = result.filePaths[0];
-        state.saveTo = 'custom';
-        el.saveToValue.textContent = path.basename(state.customFolder);
-        el.saveToValue.title = state.customFolder;
-        markSaveToSelected('custom');
-      }
-    } catch (err) {
-      // dialog failed silently; keep previous saveTo
-    }
   });
 });
 
@@ -188,6 +152,25 @@ el.qualityDown.addEventListener('click', () => {
 });
 el.qualityInput.addEventListener('change', () => {
   el.qualityInput.value = clampQuality(parseInt(el.qualityInput.value, 10) || 90);
+});
+
+// ---------------------------------------------------------------------------
+// Size (scale %) stepper
+// ---------------------------------------------------------------------------
+
+function clampScalePercent(v) { return Math.min(200, Math.max(1, v)); }
+
+el.sizePercentUp.addEventListener('click', () => {
+  el.sizeCustomInput.value = clampScalePercent((parseInt(el.sizeCustomInput.value, 10) || 0) + 5);
+  updateSizeLabel();
+});
+el.sizePercentDown.addEventListener('click', () => {
+  el.sizeCustomInput.value = clampScalePercent((parseInt(el.sizeCustomInput.value, 10) || 0) - 5);
+  updateSizeLabel();
+});
+el.sizeCustomInput.addEventListener('change', () => {
+  el.sizeCustomInput.value = clampScalePercent(parseInt(el.sizeCustomInput.value, 10) || 50);
+  updateSizeLabel();
 });
 
 // ---------------------------------------------------------------------------
@@ -454,8 +437,9 @@ function buildFfmpegArgs(intermediate, format, settings, outputPath) {
     args.push('-i', intermediate.filePath);
   }
 
-  if (settings.size === 'custom' && settings.sizeValue > 0) {
-    args.push('-vf', `scale=w='min(iw,${settings.sizeValue})':h='min(ih,${settings.sizeValue})':force_original_aspect_ratio=decrease`);
+  if (settings.size === 'custom' && settings.scalePercent > 0 && settings.scalePercent !== 100) {
+    const factor = settings.scalePercent / 100;
+    args.push('-vf', `scale=w=trunc(iw*${factor}):h=trunc(ih*${factor})`);
   }
 
   args.push('-frames:v', '1');
@@ -518,10 +502,7 @@ function gatherSettings() {
     formats: state.formats,
     quality: parseInt(el.qualityInput.value, 10) || 90,
     size: state.size,
-    sizeValue: parseInt(el.sizeCustomInput.value, 10) || 0,
-    saveTo: state.saveTo,
-    customFolder: state.customFolder,
-    addToEagle: el.addToEagle.checked,
+    scalePercent: parseInt(el.sizeCustomInput.value, 10) || 100,
   };
 }
 
@@ -531,7 +512,6 @@ async function convertAll() {
 
   if (!state.ffmpegPaths) return;
   if (state.files.length === 0) return;
-  if (settings.saveTo === 'custom' && !settings.customFolder) return;
 
   setConverting(true);
 
@@ -554,8 +534,7 @@ async function convertAll() {
       continue;
     }
 
-    const outputDir = settings.saveTo === 'source' ? path.dirname(file.filePath) : settings.customFolder;
-    try { fs.mkdirSync(outputDir, { recursive: true }); } catch {}
+    const outputDir = path.dirname(file.filePath);
 
     const producedPaths = [];
     for (const format of settings.formats) {
@@ -568,7 +547,7 @@ async function convertAll() {
 
     cleanupIntermediate(intermediate);
 
-    if (settings.addToEagle && producedPaths.length) {
+    if (producedPaths.length) {
       for (const p of producedPaths) {
         try {
           await eagle.item.addFromPath(p, {
@@ -607,21 +586,51 @@ async function convertAll() {
 // Eagle lifecycle
 // ---------------------------------------------------------------------------
 
-eagle.onPluginCreate(async () => {
+// Eagle only fires `plugin-create` once, when the window is first created —
+// not on a DevTools page reload during development. Every other lifecycle
+// hook (onPluginRun/onPluginShow) must not touch the eagle.* API until that
+// has happened, or calls fail with "This method can only be used after the
+// `plugin-create` event is triggered." `state.ready` gates all of that, and
+// a window-load fallback covers the dev-reload case per Eagle's own docs
+// (which suggest `window.onload` as a stand-in for `plugin-create` locally).
+state.ready = false;
+
+async function boot() {
+  if (state.ready) return;
+  state.ready = true;
   try { applyTheme(await eagle.app.theme); } catch {}
   updateQualityRowVisibility();
   await initFfmpeg();
   await refreshFromSelection();
-});
+}
+
+eagle.onPluginCreate(() => { boot(); });
 
 eagle.onPluginRun(async () => {
+  if (!state.ready) return;
   await refreshFromSelection();
 });
 
 eagle.onPluginShow(async () => {
+  if (!state.ready) return;
   await refreshFromSelection();
 });
 
 eagle.onThemeChanged((theme) => applyTheme(theme));
+
+window.addEventListener('load', () => {
+  // Only kicks in if `plugin-create` never arrives (dev reload). On a real
+  // first launch, onPluginCreate above will already have set state.ready.
+  setTimeout(boot, 300);
+});
+
+// Belt-and-suspenders: never let a stray eagle.* rejection (e.g. from a
+// call that raced ahead of `plugin-create`) surface as a noisy uncaught
+// error in DevTools — every call site above already handles its own
+// errors, but this keeps things quiet if anything is ever missed.
+window.addEventListener('unhandledrejection', (event) => {
+  console.warn('Ignored plugin API rejection:', event.reason);
+  event.preventDefault();
+});
 
 renderFileList();

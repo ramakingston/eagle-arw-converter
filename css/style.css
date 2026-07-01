@@ -34,6 +34,32 @@ body[data-theme="LIGHTGRAY"] {
 
 * { box-sizing: border-box; }
 
+/* Strip every native browser control affordance (focus rings, tap
+   highlights, selection halos) so every interactive element only shows
+   the custom styling defined below. */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, select, textarea {
+  font-family: inherit;
+  outline: none;
+}
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: none;
+}
+input[type="checkbox"], input[type="radio"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* Author styles like `.row { display: flex }` otherwise win over the
+   browser's built-in `[hidden] { display: none }` UA rule, so anything
+   toggled via the `hidden` attribute needs this to actually hide. */
+[hidden] {
+  display: none !important;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -166,6 +192,7 @@ html, body {
 }
 
 .control:hover { background: var(--control-bg-hover); }
+.control:focus-within { border-color: var(--accent); }
 
 .control-value {
   font-size: 12px;
@@ -218,7 +245,73 @@ html, body {
   cursor: pointer;
 }
 .menu-check:hover { background: var(--control-bg-hover); }
-.menu-check input { accent-color: var(--accent); cursor: pointer; margin: 0; }
+
+.menu-check-label {
+  flex: 1;
+}
+
+/* Custom checkbox (replaces native browser checkbox rendering entirely) */
+
+.checkbox {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+.checkbox input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkbox-box {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--control-bg);
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  transition: background 0.12s, border-color 0.12s;
+  pointer-events: none;
+}
+
+.checkbox-icon {
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.1s, transform 0.1s;
+}
+.checkbox-icon path {
+  fill: none;
+  stroke: var(--accent-text);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.checkbox input:checked ~ .checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.checkbox input:checked ~ .checkbox-box .checkbox-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.checkbox input:hover ~ .checkbox-box {
+  border-color: var(--accent);
+}
+
+.checkbox input:focus-visible ~ .checkbox-box {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
 
 /* Stepper (Quality) */
 
@@ -282,55 +375,13 @@ html, body {
   font-size: 11px;
 }
 
+.stepper .unit {
+  margin-right: 2px;
+}
+
 .sub-row .control,
 .stepper {
   cursor: text;
-}
-
-/* Switch (Add to Eagle) */
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 34px;
-  height: 20px;
-  cursor: pointer;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-}
-
-.switch-track {
-  position: absolute;
-  inset: 0;
-  background: var(--control-bg);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.switch-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  background: var(--text-secondary);
-  border-radius: 50%;
-  transition: transform 0.15s, background 0.15s;
-}
-
-.switch input:checked + .switch-track {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-.switch input:checked + .switch-track .switch-thumb {
-  transform: translateX(14px);
-  background: #fff;
 }
 
 /* File list */
@@ -449,6 +500,7 @@ html, body {
 }
 .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary:focus-visible { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35); }
 
 .btn-secondary {
   background: var(--control-bg);
@@ -456,6 +508,12 @@ html, body {
   border: 1px solid var(--border);
 }
 .btn-secondary:hover { background: var(--control-bg-hover); }
+.btn-secondary:focus-visible { border-color: var(--accent); }
+
+.titlebar-close:focus-visible { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35); }
+.stepper-btn:focus-visible { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35); }
+.menu-item:focus-visible,
+.menu-check:focus-within { background: var(--control-bg-hover); }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }

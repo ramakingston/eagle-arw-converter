@@ -6,7 +6,7 @@
     "name": "RAW to Image Converter",
     "logo": "/logo.png",
     "keywords": ["raw", "arw", "sony", "convert", "jpg", "png", "webp", "tiff", "ffmpeg", "photography", "export"],
-    "devTools": true,
+    "devTools": false,
     "dependencies": ["ffmpeg"],
     "main": {
         "url": "index.html",

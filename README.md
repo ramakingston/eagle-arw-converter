@@ -41,10 +41,14 @@ file instead of silently skipping it.
 - Batch conversion to JPEG, PNG, WEBP, TIFF, BMP, GIF, and AVIF — pick any
   combination from the **Format** dropdown.
 - Adjustable **Quality** (only shown when a lossy format — JPEG/WEBP/AVIF —
-  is selected) and an optional **Size** cap on the longest side.
-- **Save to** the original folder or a folder you choose.
-- **Add to Eagle** toggle to import converted files straight back into your
-  library, carrying over the original's tags/folders.
+  is selected) and an optional **Size** scale (as a percentage of the
+  original dimensions).
+- Converted files are always saved next to the original `.ARW` and always
+  imported back into Eagle (carrying over the original's tags/folders) — no
+  extra options to configure.
+- Every control (checkboxes, dropdowns, the quality stepper) is a fully
+  custom, hand-styled component — no default browser form widgets or focus
+  rings anywhere in the UI.
 
 ## Setup (development / local use)
 
@@ -74,12 +78,11 @@ file instead of silently skipping it.
    plugin — the file list fills in automatically from whatever is currently
    selected (reselecting files while the plugin window is open refreshes it
    too).
-2. Choose **Format** (one or more), **Quality** (if applicable), **Size**,
-   and **Save to** location.
-3. Toggle **Add to Eagle** if you want the converted files imported back
-   into your library.
-4. Click **Convert**. Each file's row shows live status (Converting… / Done
-   / an error message) in place of its format label.
+2. Choose **Format** (one or more) and, if applicable, **Quality** and
+   **Size**.
+3. Click **Convert**. Each file's row shows live status (Converting… / Done
+   / an error message) in place of its format label. Converted files land
+   next to the original and are automatically added back into Eagle.
 
 ## Notes & limitations
 
