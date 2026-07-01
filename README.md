@@ -32,15 +32,19 @@ file instead of silently skipping it.
 
 ## Features
 
-- Batch conversion of multiple `.ARW` files at once.
-- Output to JPEG, PNG, WEBP, TIFF, BMP, GIF, and AVIF — pick any combination.
-- Adjustable quality (JPEG/WEBP/AVIF), optional resize (longest side cap),
-  8-bit or 16-bit output, camera white balance / auto-brightness toggles.
-- Save next to the original file or to a folder you choose.
-- Optionally import the converted files straight back into your Eagle
+- **Always follows your Eagle selection.** There's no "Add Files" or "Use
+  Selection" button — select `.ARW` files in your library and open the
+  plugin (or reselect while it's open); the file list updates automatically.
+- Native-style Eagle UI: frameless window with a custom title bar, compact
+  label/dropdown rows, and light/dark palettes that follow Eagle's own theme
+  (`eagle.app.theme` / `eagle.onThemeChanged`).
+- Batch conversion to JPEG, PNG, WEBP, TIFF, BMP, GIF, and AVIF — pick any
+  combination from the **Format** dropdown.
+- Adjustable **Quality** (only shown when a lossy format — JPEG/WEBP/AVIF —
+  is selected) and an optional **Size** cap on the longest side.
+- **Save to** the original folder or a folder you choose.
+- **Add to Eagle** toggle to import converted files straight back into your
   library, carrying over the original's tags/folders.
-- Works from an Eagle file selection (**Use Eagle Selection**) or by picking
-  files manually (**Add ARW Files…**).
 
 ## Setup (development / local use)
 
@@ -66,14 +70,16 @@ file instead of silently skipping it.
 
 ## Usage
 
-1. Select one or more `.ARW` files in your Eagle library, open this plugin,
-   and click **Use Eagle Selection** (or click **Add ARW Files…** to pick
-   files from disk directly).
-2. Choose your target format(s), quality, resize limit, and RAW decoding
-   options in the right-hand panel.
-3. Choose where output files should be saved, and whether converted files
-   should be added back into Eagle.
-4. Click **Convert** and watch progress in the Activity Log.
+1. Select one or more `.ARW` files in your Eagle library, then open the
+   plugin — the file list fills in automatically from whatever is currently
+   selected (reselecting files while the plugin window is open refreshes it
+   too).
+2. Choose **Format** (one or more), **Quality** (if applicable), **Size**,
+   and **Save to** location.
+3. Toggle **Add to Eagle** if you want the converted files imported back
+   into your library.
+4. Click **Convert**. Each file's row shows live status (Converting… / Done
+   / an error message) in place of its format label.
 
 ## Notes & limitations
 
