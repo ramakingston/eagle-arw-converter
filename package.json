@@ -1,0 +1,10 @@
+{
+  "name": "eagle-arw-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Eagle plugin that converts Sony .ARW raw photos into JPEG, PNG, WEBP, TIFF, BMP, GIF and AVIF using LibRaw (decode) and FFmpeg (encode).",
+  "license": "MIT",
+  "dependencies": {
+    "libraw-wasm": "^1.5.0"
+  }
+}

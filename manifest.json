@@ -1,0 +1,24 @@
+{
+    "id": "A00EJ7937NX9N",
+    "version": "1.0.0",
+    "platform": "all",
+    "arch": "all",
+    "name": "RAW to Image Converter",
+    "logo": "/logo.png",
+    "keywords": ["raw", "arw", "sony", "convert", "jpg", "png", "webp", "tiff", "ffmpeg", "photography", "batch"],
+    "devTools": true,
+    "dependencies": ["ffmpeg"],
+    "main": {
+        "url": "index.html",
+        "width": 1040,
+        "height": 760,
+        "minWidth": 820,
+        "minHeight": 600,
+        "backgroundColor": "#1b1c1f",
+        "resizable": true,
+        "fullscreenable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "multiple": false
+    }
+}

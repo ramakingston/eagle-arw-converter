@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>RAW to Image Converter</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <header class="topbar">
+      <div class="topbar-title">
+        <img class="topbar-logo" src="logo.png" alt="">
+        <div>
+          <h1>RAW to Image Converter</h1>
+          <p id="engineStatus" class="subtitle">Checking FFmpeg dependency&hellip;</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="btnAddFiles" class="btn btn-secondary">Add ARW Files&hellip;</button>
+        <button id="btnUseSelection" class="btn btn-secondary">Use Eagle Selection</button>
+      </div>
+    </header>
+
+    <main class="layout">
+
+      <section class="file-panel">
+        <div class="file-panel-head">
+          <span id="fileCount">0 files</span>
+          <div class="file-panel-actions">
+            <button id="btnSelectAll" class="link-btn">Select all</button>
+            <button id="btnClear" class="link-btn">Clear</button>
+          </div>
+        </div>
+        <div id="fileList" class="file-list">
+          <div class="empty-state">
+            <p>No .ARW files yet.</p>
+            <p class="muted">Select Sony RAW files in Eagle and click <strong>Use Eagle Selection</strong>, or click <strong>Add ARW Files&hellip;</strong> above.</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="settings-panel">
+
+        <div class="settings-group">
+          <h2>Output formats</h2>
+          <div class="format-grid" id="formatGrid">
+            <label class="chip"><input type="checkbox" value="jpg" checked><span>JPEG</span></label>
+            <label class="chip"><input type="checkbox" value="png"><span>PNG</span></label>
+            <label class="chip"><input type="checkbox" value="webp"><span>WEBP</span></label>
+            <label class="chip"><input type="checkbox" value="tiff"><span>TIFF</span></label>
+            <label class="chip"><input type="checkbox" value="bmp"><span>BMP</span></label>
+            <label class="chip"><input type="checkbox" value="gif"><span>GIF</span></label>
+            <label class="chip"><input type="checkbox" value="avif"><span>AVIF</span></label>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h2>Quality <span id="qualityValue" class="value-pill">90</span></h2>
+          <input type="range" id="qualitySlider" min="1" max="100" value="90">
+          <p class="muted small">Applies to JPEG, WEBP and AVIF. PNG, BMP, TIFF and GIF are always lossless.</p>
+        </div>
+
+        <div class="settings-group">
+          <h2>Resize</h2>
+          <label class="row">
+            <input type="checkbox" id="resizeEnabled">
+            <span>Limit longest side to</span>
+          </label>
+          <input type="number" id="resizeValue" min="16" value="4096" disabled>
+          <span class="muted small">pixels (aspect ratio preserved)</span>
+        </div>
+
+        <div class="settings-group">
+          <h2>RAW decoding</h2>
+          <label class="row">
+            <input type="checkbox" id="useCameraWb" checked>
+            <span>Use camera white balance</span>
+          </label>
+          <label class="row">
+            <input type="checkbox" id="autoBrightness" checked>
+            <span>Auto brightness</span>
+          </label>
+          <label class="row">
+            <input type="checkbox" id="highBitDepth">
+            <span>16-bit output (TIFF/PNG only)</span>
+          </label>
+        </div>
+
+        <div class="settings-group">
+          <h2>Output location</h2>
+          <label class="radio-row">
+            <input type="radio" name="outputMode" value="source" checked>
+            <span>Same folder as original</span>
+          </label>
+          <label class="radio-row">
+            <input type="radio" name="outputMode" value="custom">
+            <span>Choose folder&hellip;</span>
+          </label>
+          <button id="btnChooseFolder" class="btn btn-secondary btn-small" disabled>Choose&hellip;</button>
+          <p id="customFolderPath" class="muted small path-display"></p>
+          <label class="row">
+            <input type="checkbox" id="addToEagle" checked>
+            <span>Add converted images to Eagle</span>
+          </label>
+        </div>
+
+        <button id="btnConvert" class="btn btn-primary btn-convert" disabled>Convert</button>
+      </aside>
+
+    </main>
+
+    <footer class="log-panel">
+      <div class="log-panel-head">
+        <span>Activity Log</span>
+        <button id="btnClearLog" class="link-btn">Clear log</button>
+      </div>
+      <div id="log" class="log-body"></div>
+    </footer>
+
+  </div>
+
+  <script type="text/javascript" src="js/plugin.js"></script>
+</body>
+</html>
